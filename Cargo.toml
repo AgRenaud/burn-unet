@@ -1,0 +1,27 @@
+[package]
+name = "rust-unet"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+default = ["training", "dataset"]
+model = []
+training = ["model"]
+dataset = ["model"]
+full = ["model", "training", "dataset"]
+
+[dependencies]
+burn.workspace = true
+bincode.workspace = true
+image.workspace = true
+derive-new = "0.7.0"
+
+[workspace]
+members = [
+    "xtask",
+]
+
+[workspace.dependencies]
+burn = { version = "0.16.0", features = ["default", "fusion", "ndarray", "std", "train", "vision", "wgpu"] }
+bincode = "=2.0.0-rc.3"
+image = { version = "0.25.5", features = ["jpeg", "png"] }
