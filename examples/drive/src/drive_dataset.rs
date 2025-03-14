@@ -61,7 +61,7 @@ impl Mapper<SegmentationImageItemRaw, SegmentationImageItem> for PathToSegmentat
         let fov_mask = item
             .fov_mask_path
             .as_ref()
-            .map(|path| load_fov_mask_to_vec_bool(path));
+            .map(load_fov_mask_to_vec_bool);
 
         let image = image::open(&item.image_path).unwrap();
 
@@ -175,11 +175,7 @@ impl DriveDataset {
             .map(|(image_path, gt_path, fov_path)| {
                 let image_path = image_path.as_ref().to_path_buf();
                 let mask_path = gt_path.as_ref().to_path_buf();
-                let fov_mask_path = if let Some(fov_mask_path) = fov_path {
-                    Some(fov_mask_path.as_ref().to_path_buf())
-                } else {
-                    None
-                };
+                let fov_mask_path = fov_path.map(|fov_mask_path| fov_mask_path.as_ref().to_path_buf());
 
                 Self::check_extension(
                     &image_path

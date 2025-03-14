@@ -1,11 +1,18 @@
-mod drive_dataset;
-
 use anyhow::Result;
 use clap::Parser;
 use std::path::PathBuf;
 
+#[cfg(not(any(feature = "wgpu", feature = "cuda")))]
+use burn::backend::ndarray::{NdArray, NdArrayDevice};
+
+#[cfg(feature = "wgpu")]
+use burn::backend::wgpu::{Wgpu, WgpuDevice};
+
+#[cfg(feature = "cuda")]
+use burn::backend::cuda_jit::{Cuda, CudaDevice};
+
 use burn::{
-    backend::{Autodiff, Wgpu, wgpu::WgpuDevice},
+    backend::Autodiff,
     data::dataloader::DataLoaderBuilder,
     optim::AdamConfig,
     prelude::*,
@@ -16,12 +23,12 @@ use burn::{
     },
 };
 
-use crate::drive_dataset::DriveDataset;
 use burn::data::dataloader::Dataset;
 use burn_unet::{
     InputMode, SegmentationConfig, SegmentationMode, dataset::SegmentationBatcher,
     models::unet::UNetConfig,
 };
+use drive::drive_dataset::DriveDataset;
 
 #[derive(Parser, Debug)]
 pub struct TrainArgs {
@@ -65,7 +72,23 @@ fn create_artifact_dir(artifact_dir: &str) {
 }
 
 pub fn main() -> Result<()> {
+    if cfg!(feature = "wgpu") {
+        println!("Running with WGPU backend");
+    } else if cfg!(feature = "cuda") {
+        println!("Running with CUDA backend");
+    } else {
+        println!(
+            "No backend feature selected! Default backend is NdArray ; Compile with --features wgpu or --features cuda for better performances"
+        );
+    }
+
+    #[cfg(feature = "wgpu")]
     type MyBackend = Wgpu<f32, i32>;
+    #[cfg(feature = "cuda")]
+    type MyBackend = Cuda<f32, i32>;
+    #[cfg(not(any(feature = "wgpu", feature = "cuda")))]
+    type MyBackend = NdArray;
+
     type MyAutodiffBackend = Autodiff<MyBackend>;
 
     let args = TrainArgs::parse();
@@ -74,7 +97,14 @@ pub fn main() -> Result<()> {
     create_artifact_dir(artifact_dir);
 
     println!("Initializing device...");
+    #[cfg(feature = "wgpu")]
     let device = WgpuDevice::default();
+
+    #[cfg(feature = "cuda")]
+    let device = CudaDevice::default();
+
+    #[cfg(not(any(feature = "wgpu", feature = "cuda")))]
+    let device = NdArrayDevice::Cpu;
 
     MyAutodiffBackend::seed(args.seed);
 

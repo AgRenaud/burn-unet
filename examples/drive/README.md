@@ -27,7 +27,14 @@ uv run prepare_dataset.py --src data/DRIVE --dst data/DRIVE_AUGMENTED --val-spli
 Run the training with the prepared dataset:
 
 ```bash
-cargo run --release -- train --data-dir data/DRIVE_AUGMENTED --epochs 50 --batch-size 4 --lr 0.0003
+# Run with wgpu backend
+cargo run -F cuda --release -- --data-dir data/DRIVE_AUGMENTED --base-channels 32 --epochs 100 --save-checkpoints --image-size 64 --batch-size 32
+
+# Run with cuda backend
+cargo run -F cuda --release -- --data-dir data/DRIVE_AUGMENTED --base-channels 32 --epochs 100 --save-checkpoints --image-size 64 --batch-size 32
+
+# Without specified backend, will use NdArray (CPU)
+cargo run --release -- --data-dir data/DRIVE_AUGMENTED --base-channels 32 --epochs 100 --save-checkpoints --image-size 64 --batch-size 32
 ```
 
 ### Configuration Options
@@ -38,7 +45,7 @@ cargo run --release -- train --data-dir data/DRIVE_AUGMENTED --epochs 50 --batch
 - `--lr`: Learning rate
 - `--num-workers`: Number of data loading worker threads
 - `--base-channels`: Number of base channels in the U-Net (default: 64)
-- `--num-classes`: Number of segmentation classes (default: 2 for binary segmentation)
+- `--image-size`: Images size (default: 640)
 - `--seed`: Random seed for reproducibility
 - `--artifact-dir`: Directory to save model artifacts
 - `--save-checkpoints`: Whether to save model checkpoints (default: true)
