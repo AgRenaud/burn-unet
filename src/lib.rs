@@ -1,13 +1,11 @@
-pub mod model;
+#[cfg(feature = "models")]
+pub mod models;
 
 #[cfg(feature = "dataset")]
 pub mod dataset;
 
 #[cfg(feature = "training")]
 pub mod training;
-
-pub use model::UNet;
-pub use model::UNetConfig;
 
 #[cfg(feature = "dataset")]
 pub use dataset::{

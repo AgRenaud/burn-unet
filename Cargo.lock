@@ -593,7 +593,6 @@ dependencies = [
  "bincode",
  "burn",
  "derive-new 0.7.0",
- "image",
  "thiserror 2.0.12",
 ]
 

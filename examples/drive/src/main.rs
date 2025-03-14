@@ -19,8 +19,8 @@ use burn::{
 use crate::drive_dataset::DriveDataset;
 use burn::data::dataloader::Dataset;
 use burn_unet::{
-    InputMode, SegmentationConfig, SegmentationMode, UNetConfig,
-    dataset::SegmentationBatcher,
+    InputMode, SegmentationConfig, SegmentationMode, dataset::SegmentationBatcher,
+    models::unet::UNetConfig,
 };
 
 #[derive(Parser, Debug)]
@@ -78,9 +78,15 @@ pub fn main() -> Result<()> {
 
     MyAutodiffBackend::seed(args.seed);
 
+    let input_mode = if args.grayscale {
+        InputMode::Grayscale
+    } else {
+        InputMode::RGB
+    };
+
     let seg_config = SegmentationConfig::new(
         SegmentationMode::Binary,
-        InputMode::RGB,
+        input_mode,
         [args.image_size, args.image_size],
     );
 

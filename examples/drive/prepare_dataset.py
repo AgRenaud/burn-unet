@@ -250,6 +250,7 @@ def organize_dataset(
     augmentations=0,
     seed=42,
     console=None,
+    grayscale=False,
 ):
     stats = DatasetStats()
     random.seed(seed)
@@ -328,9 +329,13 @@ def organize_dataset(
                         "_training.tif", ".png"
                     )  # 21_training.tif => 21.png
 
+                    color = cv2.COLOR_RGB2BGR
+                    if grayscale:
+                        color = cv2.COLOR_RGB2GRAY
+
                     cv2.imwrite(
                         os.path.join(dst_path, split, "images", std_img_name),
-                        cv2.cvtColor(image, cv2.COLOR_RGB2BGR),
+                        cv2.cvtColor(image, color),
                     )
                     cv2.imwrite(
                         os.path.join(dst_path, split, "groundtruth", std_img_name),
@@ -373,7 +378,7 @@ def organize_dataset(
                                     os.path.join(
                                         dst_path, split, "images", std_aug_img_name
                                     ),
-                                    cv2.cvtColor(aug_image, cv2.COLOR_RGB2BGR),
+                                    cv2.cvtColor(aug_image, color),
                                 )
                                 cv2.imwrite(
                                     os.path.join(
@@ -454,8 +459,12 @@ def main():
     parser.add_argument(
         "--augmentations", type=int, default=5, help="Augmentations per image"
     )
+    parser.add_argument("--image-size", type=int, default=640, help="Image resize")
+
     parser.add_argument(
-        "--image-size", type=int, default=640, help="Augmentations per image"
+        "--grayscale",
+        action=argparse.BooleanOptionalAction,
+        help="Image are converted to Grayscale",
     )
     parser.add_argument("--seed", type=int, default=42, help="Random seed")
     args = parser.parse_args()
@@ -472,6 +481,7 @@ def main():
     config.add_row("Augmentations", str(args.augmentations))
     config.add_row("Random Seed", str(args.seed))
     config.add_row("Image Size", f"[{args.image_size} ; {args.image_size}]")
+    config.add_row("Is grayscale", str(args.grayscale))
     console.print(config)
 
     if not os.path.exists(args.src):
@@ -494,6 +504,7 @@ def main():
             augmentations=args.augmentations,
             seed=args.seed,
             console=console,
+            grayscale=args.grayscale,
         )
         display_summary(console, stats, args.src, args.dst)
         return 0
