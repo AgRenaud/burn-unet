@@ -2,7 +2,7 @@ mod drive_dataset;
 
 use anyhow::Result;
 use clap::Parser;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use burn::{
     backend::{Autodiff, Wgpu, wgpu::WgpuDevice},
@@ -21,7 +21,6 @@ use burn::data::dataloader::Dataset;
 use burn_unet::{
     InputMode, SegmentationConfig, SegmentationMode, UNetConfig,
     dataset::SegmentationBatcher,
-    training::{IoULoss, IoUMetric},
 };
 
 #[derive(Parser, Debug)]

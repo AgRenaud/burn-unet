@@ -1,11 +1,7 @@
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
-use burn::data::dataset::transform::{Mapper, MapperDataset};
 use burn::data::dataset::vision::PixelDepth;
-use burn::data::dataset::{Dataset, InMemDataset};
 use burn::{data::dataloader::batcher::Batcher, prelude::*};
-use image::ColorType;
-use thiserror::Error;
 
 #[derive(Config, Debug)]
 pub enum SegmentationMode {

@@ -5,7 +5,6 @@ use thiserror::Error;
 use burn::data::dataset::transform::{Mapper, MapperDataset};
 use burn::data::dataset::vision::PixelDepth;
 use burn::data::dataset::{Dataset, InMemDataset};
-use burn::{data::dataloader::batcher::Batcher, prelude::*};
 
 use burn_unet::{SegmentationImageItem, SegmentationImageItemRaw};
 
@@ -130,17 +129,11 @@ impl Mapper<SegmentationImageItemRaw, SegmentationImageItem> for PathToSegmentat
 
 #[derive(Error, Debug)]
 pub enum ImageDatasetError {
-    #[error("unknown: `{0}`")]
-    Unknown(String),
-
     #[error("I/O error: `{0}`")]
     IOError(String),
 
     #[error("Invalid file extension: `{0}`")]
     InvalidFileExtensionError(String),
-
-    #[error("Parsing error: `{0}`")]
-    ParsingError(String),
 }
 
 const SUPPORTED_FILES: [&str; 4] = ["bmp", "jpg", "jpeg", "png"];
