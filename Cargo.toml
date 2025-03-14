@@ -1,5 +1,5 @@
 [package]
-name = "rust-unet"
+name = "burn-unet"
 version = "0.1.0"
 edition = "2024"
 
@@ -11,17 +11,8 @@ dataset = ["model"]
 full = ["model", "training", "dataset"]
 
 [dependencies]
-burn.workspace = true
-bincode.workspace = true
-image.workspace = true
-derive-new = "0.7.0"
-
-[workspace]
-members = [
-    "xtask",
-]
-
-[workspace.dependencies]
 burn = { version = "0.16.0", features = ["default", "fusion", "ndarray", "std", "train", "vision", "wgpu"] }
 bincode = "=2.0.0-rc.3"
+derive-new = "0.7.0"
 image = { version = "0.25.5", features = ["jpeg", "png"] }
+thiserror = "2.0.12"

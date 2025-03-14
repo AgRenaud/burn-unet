@@ -1,0 +1,12 @@
+[package]
+name = "drive"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.97"
+burn = { version = "0.16.0", features = ["wgpu", "train", "vision", "tui"] }
+burn-unet = { version = "0.1.0", path = "../.." }
+clap = { version = "4.5.32", features = ["derive"] }
+image = { version = "0.25.5", features = ["jpeg", "png", "tiff"] }
+thiserror = "2.0.12"
