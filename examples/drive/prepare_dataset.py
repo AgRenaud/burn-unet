@@ -20,6 +20,7 @@ from PIL import Image
 from rich.console import Console
 from rich.progress import Progress, TextColumn, BarColumn, TimeElapsedColumn
 from rich.panel import Panel
+from rich.prompt import Confirm
 from rich.table import Table
 
 
@@ -493,6 +494,20 @@ def main():
             )
         )
         return 1
+
+    if os.path.exists(args.dst):
+        console.print(
+            Panel(
+                "[bold orange1]Target directory already exists!",
+                title="Warning",
+                border_style="orange1",
+            )
+        )
+        overrides_dir = Confirm.ask(
+            "Would you like to continue (this may overrides some existing files) ?"
+        )
+        if not overrides_dir:
+            return 1
 
     try:
         console.print("\n[bold yellow]Starting dataset preparation...")

@@ -19,16 +19,18 @@ Then prepare the dataset into the format expected by our U-Net implementation:
 # Prepare dataset with default options (80% training, 20% validation)
 # You'll need https://github.com/astral-sh/uv to run the script.
 
-uv run prepare_dataset.py --src data/DRIVE --dst data/DRIVE_AUGMENTED --val-split 0.2 --image-size 128 --augmentations 100 --seed 42
+uv run prepare_dataset.py --src data/DRIVE --dst data/DRIVE_AUGMENTED --val-split 0.2 --image-size 64 --augmentations 100 --seed 42
 ```
 
 ### 2. Training the U-Net Model
 
 Run the training with the prepared dataset:
 
+> Make sure params `--image-size` and `--grayscale` match the prepared dataset
+
 ```bash
 # Run with wgpu backend
-cargo run -F cuda --release -- --data-dir data/DRIVE_AUGMENTED --base-channels 32 --epochs 100 --save-checkpoints --image-size 64 --batch-size 32
+cargo run -F wgpu --release -- --data-dir data/DRIVE_AUGMENTED --base-channels 32 --epochs 100 --save-checkpoints --image-size 64 --batch-size 32
 
 # Run with cuda backend
 cargo run -F cuda --release -- --data-dir data/DRIVE_AUGMENTED --base-channels 32 --epochs 100 --save-checkpoints --image-size 64 --batch-size 32
