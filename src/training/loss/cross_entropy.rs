@@ -254,7 +254,6 @@ impl<B: Backend> SegmentationCrossEntropyLoss<B> {
         targets: Tensor<B, 1, Int>,
         alpha: f32,
     ) -> Tensor<B, 2> {
-        tracing::info!("Compute smoothed targets");
         let device = &targets.device();
         let [n_elems] = targets.dims();
         let mut targets_matrix = Tensor::<B, 2>::zeros([n_elems, nr_classes], device);
