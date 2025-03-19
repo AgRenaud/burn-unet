@@ -188,11 +188,6 @@ impl<B: Backend> SegmentationCrossEntropyLoss<B> {
         let targets: Tensor<B, 1, Int> = targets.reshape([batch_size * height * width]);
         let masks: Tensor<B, 1, Bool> = masks.reshape([batch_size * height * width]);
 
-        tracing::info!("Predictions: {:?}", predictions.dims());
-        tracing::info!("Targets: {:?}", targets.dims());
-        tracing::info!("Masks: {:?}", masks.dims());
-
-        tracing::info!("Compute combined Masks");
         // Combined masks with ignored classes
         let mut combined_mask = masks.int();
         for ignore_idx in &self.ignore_indices {
@@ -201,17 +196,16 @@ impl<B: Backend> SegmentationCrossEntropyLoss<B> {
             combined_mask = combined_mask.mask_fill(ignore_mask, 1);
         }
         let masks: Tensor<B, 1, Bool> = combined_mask.bool();
-        tracing::info!("Masks: {:?}", masks.dims());
 
-        tracing::info!("Appy logits");
+        // Ensure we have no log(0) later
+        let tensor = predictions.clamp(EPSILON, 1f64 - EPSILON);
         let mut tensor: Tensor<B, 2> = if self.logits {
-            log_softmax(predictions, 1)
+            log_softmax(tensor, 1)
         } else {
-            predictions.log()
+            tensor.log()
         };
 
         // Apply smoothing
-        tracing::info!("Apply smoothing");
         let smoothed_targets = Self::compute_smoothed_targets(
             num_classes,
             batch_size,
@@ -220,7 +214,6 @@ impl<B: Backend> SegmentationCrossEntropyLoss<B> {
         );
 
         // Apply weights
-        tracing::info!("Apply weights");
         if let Some(weights) = &self.weights {
             tensor = tensor.clone()
                 * weights
@@ -229,8 +222,6 @@ impl<B: Backend> SegmentationCrossEntropyLoss<B> {
                     .repeat_dim(0, batch_size * height * width);
         }
 
-        // Ensure we have no log(0) later
-        tensor = tensor.clamp(EPSILON, 1f64 - EPSILON);
         let neg_log_likehood = (smoothed_targets * tensor).sum_dim(1).neg();
 
         let [elems, _] = neg_log_likehood.clone().dims();
@@ -248,10 +239,11 @@ impl<B: Backend> SegmentationCrossEntropyLoss<B> {
         let valid_pixels = masks.int().sum().into_scalar().to_u32();
 
         if valid_pixels > 0 {
-            tracing::info!("Valid pixel for loss {:?} / {:?}", loss, valid_pixels);
             loss / valid_pixels
         } else {
-            tracing::info!("Default loss (0)");
+            tracing::warn!(
+                "No valid pixels in batch for loss calculation! Check masks and ignore_indices."
+            );
             Tensor::from_data([0.0], &device)
         }
     }
