@@ -189,7 +189,7 @@ pub fn main() -> Result<()> {
         println!("Created checkpoint directory: {}", checkpoint_dir.display());
     }
 
-    println!("Building learner...");
+    println!("Prepare learner ...");
     let mut learner = LearnerBuilder::new(artifact_dir)
         // Model metrics
         .metric_train_numeric(LossMetric::new())
@@ -208,12 +208,15 @@ pub fn main() -> Result<()> {
         .num_epochs(args.epochs)
         .summary();
 
+    println!("Check if we save checkpoints");
     if args.save_checkpoints {
         learner = learner.with_file_checkpointer(CompactRecorder::new())
     }
 
+    println!("Build learner");
     let learner = learner.build(model, optimizer, args.lr);
 
+    println!("Fit model ...");
     let model_trained = learner.fit(dataloader_train, dataloader_valid);
 
     if args.save_checkpoints {

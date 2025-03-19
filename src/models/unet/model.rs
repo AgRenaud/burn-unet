@@ -4,9 +4,14 @@ use burn::{
     tensor::{activation::softmax, backend::AutodiffBackend},
 };
 
-use crate::IoULossConfig;
 #[cfg(feature = "training")]
-use crate::{SegmentationOutput, dataset::SegmentationBatch};
+use crate::{
+    dataset::SegmentationBatch,
+    training::{
+        SegmentationOutput,
+        loss::{IoULossConfig, SegmentationCrossEntropyLossConfig},
+    },
+};
 #[cfg(feature = "training")]
 use burn::train::{TrainOutput, TrainStep, ValidStep};
 
@@ -133,10 +138,16 @@ impl<B: Backend> UNet<B> {
     pub fn forward_segmentation(&self, item: SegmentationBatch<B>) -> SegmentationOutput<B> {
         let targets = item.masks;
         let output = self.forward(item.images);
-        let loss = IoULossConfig::new()
-            .with_num_classes(self.num_classes)
+        let masks = item.fov_masks.unwrap_or(output.ones_like().bool());
+
+        // let loss = IoULossConfig::new()
+        //     .with_num_classes(self.num_classes)
+        //     .init(&output.device())
+        //     .forward(output.clone(), targets.clone());
+
+        let loss = SegmentationCrossEntropyLossConfig::new()
             .init(&output.device())
-            .forward(output.clone(), targets.clone());
+            .forward(output.clone(), targets.clone(), masks.clone());
 
         SegmentationOutput {
             loss,
@@ -149,26 +160,14 @@ impl<B: Backend> UNet<B> {
 #[cfg(feature = "training")]
 impl<B: AutodiffBackend> TrainStep<SegmentationBatch<B>, SegmentationOutput<B>> for UNet<B> {
     fn step(&self, batch: SegmentationBatch<B>) -> TrainOutput<SegmentationOutput<B>> {
-        let output = self.forward(batch.images);
-        let loss_fn = IoULossConfig::new()
-            .with_num_classes(self.num_classes)
-            .init(&output.device());
-        let loss = loss_fn.forward(output.clone(), batch.masks.clone());
-        let item = SegmentationOutput::new(loss.clone(), output, batch.masks);
-
-        TrainOutput::new(self, loss.backward(), item)
+        let item = self.forward_segmentation(batch);
+        TrainOutput::new(self, item.loss.backward(), item)
     }
 }
 
 #[cfg(feature = "training")]
 impl<B: Backend> ValidStep<SegmentationBatch<B>, SegmentationOutput<B>> for UNet<B> {
     fn step(&self, batch: SegmentationBatch<B>) -> SegmentationOutput<B> {
-        let output = self.forward(batch.images);
-        let loss_fn = IoULossConfig::new()
-            .with_num_classes(self.num_classes)
-            .init(&output.device());
-        let loss = loss_fn.forward(output.clone(), batch.masks.clone());
-
-        SegmentationOutput::new(loss, output, batch.masks)
+        self.forward_segmentation(batch)
     }
 }

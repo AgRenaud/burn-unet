@@ -13,7 +13,4 @@ pub use dataset::{
     SegmentationImageItemRaw, SegmentationMode,
 };
 
-#[cfg(feature = "training")]
-pub use training::{IoULoss, IoULossConfig, IoUMetric, SegmentationOutput};
-
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

@@ -61,7 +61,7 @@ pub struct SegmentationImageItemRaw {
 pub struct SegmentationBatch<B: Backend> {
     pub images: Tensor<B, 4, Float>,
     pub masks: Tensor<B, 4, Int>,
-    pub fov_masks: Option<Tensor<B, 4, Int>>,
+    pub fov_masks: Option<Tensor<B, 4, Bool>>,
 }
 
 #[derive(Clone)]
@@ -163,7 +163,7 @@ impl<B: Backend> Batcher<SegmentationImageItem, SegmentationBatch<B>> for Segmen
         let images = Tensor::stack::<4>(images, 0);
         let masks = Tensor::stack::<4>(masks, 0);
         let fov_masks = if has_fov_masks {
-            Some(Tensor::stack::<4>(fov_masks, 0))
+            Some(Tensor::stack::<4>(fov_masks, 0).bool())
         } else {
             None
         };

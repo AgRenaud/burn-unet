@@ -15,3 +15,4 @@ burn = { version = "0.16.0", features = ["default", "fusion", "ndarray", "std", 
 bincode = "=2.0.0-rc.3"
 derive-new = "0.7.0"
 thiserror = "2.0.12"
+tracing = { version = "0.1.41", features = ["log"] }
