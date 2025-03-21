@@ -96,7 +96,6 @@ pub fn main() -> Result<()> {
     let artifact_dir = args.artifact_dir.to_str().expect("Can't find artifact dir");
     create_artifact_dir(artifact_dir);
 
-    println!("Initializing device...");
     #[cfg(feature = "wgpu")]
     let device = WgpuDevice::default();
 
@@ -120,12 +119,9 @@ pub fn main() -> Result<()> {
         [args.image_size, args.image_size],
     );
 
-    println!("Loading datasets...");
     let train_dir = args.data_dir.join("train");
     let valid_dir = args.data_dir.join("val");
 
-    // Load training dataset with triplets (image, groundtruth, FOV mask)
-    println!("Loading training dataset from {}...", train_dir.display());
     let train_dataset = match DriveDataset::new_from_folders(&train_dir) {
         Ok(dataset) => {
             println!("Loaded {} samples (training dataset)", dataset.len());
@@ -136,8 +132,6 @@ pub fn main() -> Result<()> {
         }
     };
 
-    // Load validation dataset with triplets
-    println!("Loading validation dataset from {}...", valid_dir.display());
     let valid_dataset = match DriveDataset::new_from_folders(&valid_dir) {
         Ok(dataset) => {
             println!("Loaded {} samples (validation dataset)", dataset.len());
@@ -148,16 +142,11 @@ pub fn main() -> Result<()> {
         }
     };
 
-    println!("Creating data batchers...");
     let batcher_train =
         SegmentationBatcher::<MyAutodiffBackend>::new(device.clone(), seg_config.clone());
 
     let batcher_valid = SegmentationBatcher::<MyBackend>::new(device.clone(), seg_config.clone());
 
-    println!(
-        "Building dataloaders with batch size {}...",
-        args.batch_size
-    );
     let dataloader_train = DataLoaderBuilder::new(batcher_train)
         .batch_size(args.batch_size)
         .num_workers(args.num_workers)
@@ -168,19 +157,11 @@ pub fn main() -> Result<()> {
         .shuffle(args.seed)
         .build(valid_dataset);
 
-    println!(
-        "Creating U-Net model with {} base channels...",
-        args.base_channels
-    );
     let model = UNetConfig::new([args.image_size, args.image_size])
         .with_base_channels(args.base_channels)
         .with_num_classes(2) // Vessels and background
         .init(&device);
 
-    println!(
-        "Initializing Adam optimizer with learning rate {}...",
-        args.lr
-    );
     let optimizer = AdamConfig::new().init();
 
     let checkpoint_dir = PathBuf::from("checkpoints");
@@ -189,7 +170,6 @@ pub fn main() -> Result<()> {
         println!("Created checkpoint directory: {}", checkpoint_dir.display());
     }
 
-    println!("Prepare learner ...");
     let mut learner = LearnerBuilder::new(artifact_dir)
         // Model metrics
         .metric_train_numeric(LossMetric::new())
@@ -208,15 +188,12 @@ pub fn main() -> Result<()> {
         .num_epochs(args.epochs)
         .summary();
 
-    println!("Check if we save checkpoints");
     if args.save_checkpoints {
         learner = learner.with_file_checkpointer(CompactRecorder::new())
     }
 
-    println!("Build learner");
     let learner = learner.build(model, optimizer, args.lr);
 
-    println!("Fit model ...");
     let model_trained = learner.fit(dataloader_train, dataloader_valid);
 
     if args.save_checkpoints {
