@@ -320,11 +320,11 @@ def organize_dataset(
                     mask_path = os.path.join(src_path, "training/mask", mask_name)
 
                     image = cv2.cvtColor(cv2.imread(img_path), cv2.COLOR_BGR2RGB)
-                    image = cv2.resize(image, (image_size, image_size))
+                    image = cv2.resize(image, (image_size, image_size), interpolation=cv2.INTER_LANCZOS4)
                     groundtruth = np.array(Image.open(gt_path).convert("L"))
-                    groundtruth = cv2.resize(groundtruth, (image_size, image_size))
+                    groundtruth = cv2.resize(groundtruth, (image_size, image_size), interpolation=cv2.INTER_CUBIC)
                     fov_mask = np.array(Image.open(mask_path).convert("L"))
-                    fov_mask = cv2.resize(fov_mask, (image_size, image_size))
+                    fov_mask = cv2.resize(fov_mask, (image_size, image_size), interpolation=cv2.INTER_CUBIC)
 
                     std_img_name = img_name.replace(
                         "_training.tif", ".png"
