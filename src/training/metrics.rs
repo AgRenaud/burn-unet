@@ -31,8 +31,11 @@ impl<B: Backend> IoUMetric<B> {
 
 impl<B: Backend> Metric for IoUMetric<B> {
     type Input = IoUInput<B>;
-    const NAME: &'static str = "IoU";
-
+    
+    fn name(&self) -> String {
+        String::from("IoUMetric")
+    }
+    
     fn update(&mut self, input: &IoUInput<B>, _metadata: &MetricMetadata) -> MetricEntry {
         let targets = input.targets.clone();
         let outputs = input.outputs.clone();
@@ -117,7 +120,7 @@ impl<B: Backend> Metric for IoUMetric<B> {
         self.state.update(
             100.0 * iou,
             batch_size,
-            FormatOptions::new(Self::NAME).unit("%").precision(2),
+            FormatOptions::new(self.name()).unit("%").precision(2),
         )
     }
 
