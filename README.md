@@ -10,6 +10,7 @@ The project includes several examples to help you get started:
 | Example | Description|
 |---|---|
 | [DRIVE: Digital Retinal Images for Vessel Extraction](examples/drive) | This example demonstrates how to use the U-Net implementation for retinal vessel segmentation using the DRIVE (Digital Retinal Images for Vessel Extraction) dataset. |
+| [Plant Growth](examples/plant-growth) | This example demonstrates how to use the U-Net implementation for instance segmentation of growing tomatoes at different stages using [LaboroTomato dataset](https://github.com/laboroai/LaboroTomato). |
 
 ## License
 
