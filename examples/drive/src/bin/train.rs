@@ -9,7 +9,7 @@ use burn::backend::ndarray::{NdArray, NdArrayDevice};
 use burn::backend::wgpu::{Wgpu, WgpuDevice};
 
 #[cfg(feature = "cuda")]
-use burn::backend::cuda_jit::{Cuda, CudaDevice};
+use burn::backend::cuda::{Cuda, CudaDevice};
 
 use burn::{
     backend::Autodiff,
