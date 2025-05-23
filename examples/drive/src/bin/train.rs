@@ -108,10 +108,10 @@ pub fn main() -> Result<()> {
 
     MyAutodiffBackend::seed(args.seed);
 
-    let input_mode = if args.grayscale {
-        InputMode::Grayscale
+    let (input_mode, input_channels) = if args.grayscale {
+        (InputMode::Grayscale, 1)
     } else {
-        InputMode::RGB
+        (InputMode::RGB, 3)
     };
 
     let seg_config = SegmentationConfig::new(
@@ -172,7 +172,7 @@ pub fn main() -> Result<()> {
         "Creating U-Net model with {} base channels...",
         args.base_channels
     );
-    let model = UNetConfig::new([args.image_size, args.image_size])
+    let model = UNetConfig::new([args.image_size, args.image_size], input_channels)
         .with_base_channels(args.base_channels)
         .with_num_classes(2) // Vessels and background
         .init(&device);

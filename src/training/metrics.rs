@@ -31,11 +31,11 @@ impl<B: Backend> IoUMetric<B> {
 
 impl<B: Backend> Metric for IoUMetric<B> {
     type Input = IoUInput<B>;
-    
+
     fn name(&self) -> String {
         String::from("IoUMetric")
     }
-    
+
     fn update(&mut self, input: &IoUInput<B>, _metadata: &MetricMetadata) -> MetricEntry {
         let targets = input.targets.clone();
         let outputs = input.outputs.clone();

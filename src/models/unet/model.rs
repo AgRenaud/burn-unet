@@ -37,6 +37,7 @@ pub struct UNet<B: Backend> {
 #[derive(Config, Debug)]
 pub struct UNetConfig {
     input_size: [usize; 2],
+    input_channels: usize,
     #[config(default = "64")]
     base_channels: usize,
     #[config(default = "1")]
@@ -48,8 +49,11 @@ pub struct UNetConfig {
 impl UNetConfig {
     pub fn init<B: Backend>(&self, device: &B::Device) -> UNet<B> {
         UNet {
-            encoder_block_1: EncoderBlockConfig::new(ConvBlockConfig::new(1, self.base_channels))
-                .init(device),
+            encoder_block_1: EncoderBlockConfig::new(ConvBlockConfig::new(
+                self.input_channels,
+                self.base_channels,
+            ))
+            .init(device),
             encoder_block_2: EncoderBlockConfig::new(ConvBlockConfig::new(
                 self.base_channels,
                 self.base_channels * 2,

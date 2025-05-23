@@ -76,8 +76,14 @@ impl<B: Backend> SegmentationBatcher<B> {
     }
 }
 
-impl<B: Backend> Batcher<B, SegmentationImageItem, SegmentationBatch<B>> for SegmentationBatcher<B> {
-    fn batch(&self, items: Vec<SegmentationImageItem>, device: &<B as Backend>::Device) -> SegmentationBatch<B> {
+impl<B: Backend> Batcher<B, SegmentationImageItem, SegmentationBatch<B>>
+    for SegmentationBatcher<B>
+{
+    fn batch(
+        &self,
+        items: Vec<SegmentationImageItem>,
+        device: &<B as Backend>::Device,
+    ) -> SegmentationBatch<B> {
         let batch_size = items.len();
         let [height, width] = self.config.image_size;
         let _input_channels = self.config.input_mode.channels();
